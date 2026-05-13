@@ -1,0 +1,56 @@
+vi livnessprobe.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mylivenessprobe
+spec:
+  containers:
+    - name: liveness
+      image: ubuntu
+      args:
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy; sleep 1000
+      livenessProbe:
+        exec:
+          command:
+            - cat
+            - /tmp/healthy
+        initialDelaySeconds: 5      #no of seconds to wait before performing first livenessprobe 
+        periodSeconds: 5   #number of seconds to wait before performing consecutive livenessprobe.default value 10sec
+        timeoutSeconds: 30  #this will keep on checking for 30 sec and wait for response and restart container
+
+
+
+kubectl apply -f livnessprobe.yml
+
+kubectl get pod 
+
+
+
+kubectl get pods
+
+kubectl exec mylivenessprobe -it -- /bin/bash   #command to enter inside the pod
+
+cat /tmp/healthy   #no output
+
+cd /tmp
+
+rm -rf healthy
+
+wait for some time ...
+
+you will see that you will exit
+
+kubectl get pods
+
+(you will see that container is restarted) 
+
+
+
+
+
+
+
+
