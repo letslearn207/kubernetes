@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes CNI — Complete Lab Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #d29922;
+    --accent4: #f85149;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --purple: #bc8cff;
+    --orange: #ffa657;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .lab-header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d2137 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 0 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .lab-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 70%);
+  }
+  .lab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+  }
+  .lab-header h1 {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .lab-header h1 span { color: var(--accent); }
+  .lab-header p {
+    color: var(--text2);
+    font-size: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .meta-pill span { color: var(--text); font-weight: 600; }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 36px 0 0;
+  }
+  .toc h3 {
+    font-size: 13px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .toc ol {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 6px;
+  }
+  .toc ol li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--accent);
+    font-size: 14px;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+  .toc ol li a:hover { color: var(--text); }
+  .toc ol li a .n {
+    background: rgba(88,166,255,0.12);
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .section { margin-top: 48px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    background: var(--accent);
+    color: #0d1117;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 20px; font-weight: 600; color: var(--text); }
+  .section-header .tag {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  p.desc { color: var(--text2); margin-bottom: 16px; }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .step-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .step-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    flex-shrink: 0;
+  }
+  .step-body { padding: 16px; }
+  .step-body p { color: var(--text2); font-size: 14px; margin-bottom: 12px; }
+  .code-block {
+    position: relative;
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+  }
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text2);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: rgba(88,166,255,0.1); border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { background: rgba(63,185,80,0.1); border-color: var(--accent2); color: var(--accent2); }
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .kw { color: var(--accent); }
+  .cm { color: var(--text3); font-style: italic; }
+  .str { color: var(--accent2); }
+  .var { color: var(--orange); }
+  .flag { color: var(--purple); }
+  .callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  .callout.info  { background: rgba(88,166,255,0.07);  border: 1px solid rgba(88,166,255,0.2);  color: var(--accent); }
+  .callout.warn  { background: rgba(210,153,34,0.07);  border: 1px solid rgba(210,153,34,0.2);  color: var(--accent3); }
+  .callout.tip   { background: rgba(63,185,80,0.07);   border: 1px solid rgba(63,185,80,0.2);   color: var(--accent2); }
+  .callout.danger{ background: rgba(248,81,73,0.07);   border: 1px solid rgba(248,81,73,0.2);   color: var(--accent4); }
+  .callout .icon { font-size: 18px; flex-shrink: 0; }
+  .callout .body { color: var(--text2); }
+  .callout .body strong { color: var(--text); }
+  .yaml-block {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .yaml-block .code-header { border-left: none; }
+  .yn { color: var(--accent); }
+  .yv { color: var(--accent2); }
+  .yc { color: var(--text3); }
+  .yk { color: var(--orange); }
+  .verify-box {
+    background: rgba(63,185,80,0.05);
+    border: 1px solid rgba(63,185,80,0.2);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 10px;
+  }
+  .verify-box .title {
+    font-size: 12px;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .verify-box pre { padding: 0; font-size: 12px; color: var(--text2); }
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .arch-card h4 {
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .arch-card p { color: var(--text2); font-size: 14px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .summary-table th {
+    text-align: left;
+    padding: 9px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 400;
+  }
+  .summary-table td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    vertical-align: top;
+  }
+  .summary-table td:first-child { color: var(--accent); }
+  .summary-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--accent);
+  }
+  .concept-card h4 {
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .concept-card h4 .label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: rgba(88,166,255,0.1);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-right: 8px;
+  }
+  .concept-card p { color: var(--text2); font-size: 14px; line-height: 1.7; }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 16px 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    text-align: center;
+  }
+  .flow-box.accent { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.07); }
+  .flow-box.green  { border-color: var(--accent2); color: var(--accent2); background: rgba(63,185,80,0.07); }
+  .flow-box.purple { border-color: var(--purple); color: var(--purple); background: rgba(188,140,255,0.07); }
+  .flow-arrow {
+    color: var(--text3);
+    font-size: 18px;
+    padding: 0 4px;
+  }
+  .plugin-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .plugin-card .ph {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .plugin-card .ph .badge {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid;
+  }
+  .badge-blue   { color: var(--accent);  border-color: var(--accent);  background: rgba(88,166,255,0.08); }
+  .badge-green  { color: var(--accent2); border-color: var(--accent2); background: rgba(63,185,80,0.08); }
+  .badge-purple { color: var(--purple);  border-color: var(--purple);  background: rgba(188,140,255,0.08); }
+  .badge-orange { color: var(--orange);  border-color: var(--orange);  background: rgba(255,166,87,0.08); }
+  .plugin-card .ph h4 { font-size: 15px; font-weight: 600; color: var(--text); }
+  .plugin-card p { color: var(--text2); font-size: 14px; margin-bottom: 8px; }
+  .plugin-card ul { list-style: none; padding: 0; }
+  .plugin-card ul li {
+    color: var(--text2);
+    font-size: 13px;
+    padding: 3px 0 3px 18px;
+    position: relative;
+  }
+  .plugin-card ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 12px;
+  }
+  .footer {
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+    padding: 24px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text3);
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="lab-header">
+  <div class="lab-badge">🌐 Hands-On Lab</div>
+  <h1>Kubernetes <span>CNI</span> — Complete Lab Guide</h1>
+  <p>Understand Container Network Interface from scratch: theory, plugin comparison, AWS VPC CNI on EKS, Network Policies, and troubleshooting.</p>
+  <div class="meta-row">
+    <div class="meta-pill">⏱ Duration: <span>60–90 min</span></div>
+    <div class="meta-pill">🖥 OS: <span>Ubuntu 22.04 (EC2)</span></div>
+    <div class="meta-pill">☁️ Cluster: <span>AWS EKS</span></div>
+    <div class="meta-pill">🔌 Plugin: <span>AWS VPC CNI + Calico</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>// Lab Sections</h3>
+    <ol>
+      <li><a href="#s1"><span class="n">01</span> What is CNI? — The Concept</a></li>
+      <li><a href="#s2"><span class="n">02</span> How CNI Works in Kubernetes</a></li>
+      <li><a href="#s3"><span class="n">03</span> CNI Plugins Compared</a></li>
+      <li><a href="#s4"><span class="n">04</span> Explore AWS VPC CNI on EKS</a></li>
+      <li><a href="#s5"><span class="n">05</span> Pod-to-Pod Networking Deep Dive</a></li>
+      <li><a href="#s6"><span class="n">06</span> Kubernetes Network Policies</a></li>
+      <li><a href="#s7"><span class="n">07</span> Install Calico for Network Policy</a></li>
+      <li><a href="#s8"><span class="n">08</span> Hands-On Network Policy Lab</a></li>
+      <li><a href="#s9"><span class="n">09</span> Troubleshooting CNI Issues</a></li>
+      <li><a href="#s10"><span class="n">10</span> Cleanup</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1 — WHAT IS CNI -->
+  <!-- ============================================================ -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>What is CNI? — The Concept</h2>
+      <span class="tag">theory</span>
+    </div>
+    <p class="desc">Before touching any command, understand <em>why</em> CNI exists and what problem it solves.</p>
+
+    <div class="concept-card">
+      <h4><span class="label">ANALOGY</span>The Apartment Building Intercom Problem</h4>
+      <p>
+        Imagine a giant apartment building (your Kubernetes cluster). Each apartment is a Pod. Residents (containers) live inside. 
+        Now, for any two residents to call each other, the building needs an <strong>intercom system</strong> — wiring, phone numbers, routing rules.
+        <br><br>
+        <strong>CNI is that intercom system.</strong> It is a specification that tells Kubernetes: "here is how to wire up networking 
+        whenever a new apartment (Pod) is created or destroyed." Kubernetes itself doesn't care <em>how</em> the wiring works — 
+        it just calls a standard interface, and the CNI plugin does the actual wiring.
+      </p>
+    </div>
+
+    <div class="concept-card" style="border-left-color: var(--accent2);">
+      <h4><span class="label" style="color:var(--accent2); background:rgba(63,185,80,0.1)">FORMAL</span>CNI — Container Network Interface</h4>
+      <p>
+        CNI is a <strong>specification + set of libraries</strong> (originally from CoreOS, now a CNCF project) that defines:
+        <br><br>
+        — A standard way for container runtimes (containerd, CRI-O) to request network setup<br>
+        — A standard way for plugins to respond with network info (IP address, routes, DNS)<br>
+        — A plugin model where different network implementations can be swapped in<br><br>
+        When Kubernetes needs to start a Pod, it calls the CNI plugin's binary with a JSON config. The plugin sets up the 
+        network interface (veth pair, IP, routes) and reports back. When the Pod dies, the plugin cleans everything up.
+      </p>
+    </div>
+
+    <div class="callout info">
+      <span class="icon">💡</span>
+      <div class="body"><strong>Key insight:</strong> Kubernetes itself has <em>zero networking code</em>. It defines four rules (the Kubernetes network model) and delegates all implementation to CNI plugins. This is why you can swap Flannel for Calico for Weave without changing Kubernetes itself.</div>
+    </div>
+
+    <div class="arch-card" style="margin-top:16px">
+      <h4>// The 4 Kubernetes Network Rules (CNI must satisfy ALL of these)</h4>
+      <p>
+        <strong style="color:var(--text)">1. Pod-to-Pod</strong> &nbsp;— Every pod can talk to every other pod across nodes without NAT.<br>
+        <strong style="color:var(--text)">2. Node-to-Pod</strong> &nbsp;— Every node can talk to every pod without NAT.<br>
+        <strong style="color:var(--text)">3. Pod sees its own IP</strong> &nbsp;— The IP a pod sees for itself is the same IP others use to reach it.<br>
+        <strong style="color:var(--text)">4. Services</strong> &nbsp;— A stable virtual IP (ClusterIP) load-balances across pod endpoints (handled by kube-proxy, not CNI).
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2 — HOW CNI WORKS -->
+  <!-- ============================================================ -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>How CNI Works in Kubernetes</h2>
+      <span class="tag">theory</span>
+    </div>
+    <p class="desc">Trace the exact journey from <em>kubectl apply</em> to a Pod getting an IP address.</p>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step-by-step: Pod creation → IP assignment</div>
+      <div class="step-body">
+        <p>When you run <code>kubectl apply -f pod.yaml</code>, here is what happens under the hood:</p>
+
+        <div class="flow-row">
+          <div class="flow-box accent">kubectl apply</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box">kube-apiserver</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box">kube-scheduler</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box">kubelet (on node)</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box green">CNI Plugin</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box purple">Pod gets IP</div>
+        </div>
+
+        <div class="callout info" style="margin-top:14px">
+          <span class="icon">🔍</span>
+          <div class="body">
+            <strong>kubelet is the trigger.</strong> Once the scheduler assigns the Pod to a node, the kubelet on that node:
+            <br>1. Asks the container runtime (containerd) to create a <strong>pause container</strong> (the network namespace holder)
+            <br>2. Calls the CNI binary: <code>/opt/cni/bin/&lt;plugin&gt;</code> with ADD command
+            <br>3. Passes a JSON config from <code>/etc/cni/net.d/</code>
+            <br>4. CNI plugin creates a <strong>veth pair</strong>, assigns IP, sets routes, and returns the IP to kubelet
+            <br>5. kubelet stores the IP and reports it to the API server
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Key CNI concepts you must know</div>
+      <div class="step-body">
+        <div class="grid2">
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// veth pair</h4>
+            <p>A virtual Ethernet cable with two ends. One end goes inside the Pod's network namespace, the other stays on the host. Like plugging a LAN cable from a room into the building's switch. Traffic goes in one end and comes out the other.</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// Network Namespace</h4>
+            <p>A completely isolated network stack (interfaces, routes, iptables). Every Pod gets its own. Containers in the same Pod share one namespace — that's why they can talk on <code>localhost</code> but are isolated from other pods.</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// CNI Config (/etc/cni/net.d/)</h4>
+            <p>JSON files that tell kubelet which CNI plugin to call and with what settings. Example: <code>10-aws.conflist</code> for AWS VPC CNI. Kubelet reads the lexicographically first file in this directory.</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// CNI Binaries (/opt/cni/bin/)</h4>
+            <p>The actual executables: <code>aws-cni</code>, <code>calico</code>, <code>flannel</code>, <code>loopback</code>, <code>portmap</code>, etc. These are called by kubelet and perform the actual kernel-level network setup using Linux netlink calls.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> What happens at the Linux kernel level</div>
+      <div class="step-body">
+        <p>The CNI plugin ultimately makes these kernel calls to wire up a Pod's network:</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash (conceptual — what CNI does internally)</span></div>
+          <pre><span class="cm"># 1. Create a veth pair</span>
+ip link add <span class="var">veth0</span> type veth peer name <span class="var">eth0</span>
+
+<span class="cm"># 2. Move one end into the Pod's network namespace</span>
+ip link set <span class="var">eth0</span> netns <span class="var">&lt;pod-netns&gt;</span>
+
+<span class="cm"># 3. Assign IP address to the pod's interface</span>
+ip netns exec <span class="var">&lt;pod-netns&gt;</span> ip addr add <span class="str">192.168.1.5/24</span> dev <span class="var">eth0</span>
+
+<span class="cm"># 4. Bring up the interfaces</span>
+ip netns exec <span class="var">&lt;pod-netns&gt;</span> ip link set <span class="var">eth0</span> up
+ip link set <span class="var">veth0</span> up
+
+<span class="cm"># 5. Add default route inside the Pod</span>
+ip netns exec <span class="var">&lt;pod-netns&gt;</span> ip route add default via <span class="str">192.168.1.1</span>
+
+<span class="cm"># 6. Connect host-side veth to bridge (Flannel/Calico) or ENI (AWS VPC CNI)</span>
+ip link set <span class="var">veth0</span> master <span class="var">cni0</span></pre>
+        </div>
+        <div class="callout tip">
+          <span class="icon">💡</span>
+          <div class="body"><strong>The pause container trick:</strong> Every Pod starts with a hidden <code>pause</code> container (also called the "infra container"). Its only job is to hold the network namespace open. All other containers in the Pod join this namespace. If the app container crashes and restarts, the network namespace (and IP) is preserved.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3 — CNI PLUGINS COMPARED -->
+  <!-- ============================================================ -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>CNI Plugins Compared</h2>
+      <span class="tag">theory</span>
+    </div>
+    <p class="desc">There are many CNI plugins. Each makes different trade-offs between simplicity, performance, and features.</p>
+
+    <div class="plugin-card">
+      <div class="ph"><h4>🟠 Flannel</h4><span class="badge badge-orange">Simplest</span></div>
+      <p>The simplest CNI plugin. Gives every node a subnet and wraps pod traffic in VXLAN tunnels (by default) to route between nodes. No Network Policy support. Great for learning but rarely used in production.</p>
+      <ul>
+        <li>Overlay network using VXLAN (default) or UDP</li>
+        <li>No Network Policy support</li>
+        <li>Very easy to install — one kubectl apply</li>
+        <li>Best for: dev/test clusters, learning Kubernetes networking</li>
+      </ul>
+    </div>
+
+    <div class="plugin-card">
+      <div class="ph"><h4>🦁 Calico</h4><span class="badge badge-blue">Most Popular Production Choice</span></div>
+      <p>The gold standard for production. Can work without overlay (BGP, pure IP routing) which means near-native performance. Full Network Policy support including its own extended CiliumNetworkPolicy. Used by many cloud providers.</p>
+      <ul>
+        <li>Can use BGP routing (no overlay, full line-rate performance)</li>
+        <li>Full Kubernetes NetworkPolicy + extended GlobalNetworkPolicy</li>
+        <li>Works in both overlay (VXLAN/IPIP) and non-overlay modes</li>
+        <li>Best for: on-prem, bare metal, EKS (with Calico for policy only)</li>
+      </ul>
+    </div>
+
+    <div class="plugin-card">
+      <div class="ph"><h4>🕸 Weave Net</h4><span class="badge badge-purple">Easy + Policy</span></div>
+      <p>Creates a mesh overlay network. Simpler to operate than Calico, supports Network Policy, includes built-in encryption. Slower than Calico in high-throughput scenarios due to the mesh overlay.</p>
+      <ul>
+        <li>Overlay mesh — no BGP configuration needed</li>
+        <li>Supports Kubernetes NetworkPolicy</li>
+        <li>Optional built-in encryption (overhead: ~17%)</li>
+        <li>Best for: small to mid-size clusters needing simplicity + policy</li>
+      </ul>
+    </div>
+
+    <div class="plugin-card">
+      <div class="ph"><h4>🔶 AWS VPC CNI</h4><span class="badge badge-green">Default on EKS</span></div>
+      <p>AWS-native CNI. Does NOT use an overlay. Instead, assigns actual VPC IP addresses directly to pods from ENIs (Elastic Network Interfaces). Pods are first-class VPC citizens — reachable from any VPC resource without NAT. This is what your EKS cluster is running.</p>
+      <ul>
+        <li>No overlay — pods get real VPC IPs from ENIs</li>
+        <li>Native VPC routing — no tunneling overhead</li>
+        <li>Pod traffic visible in VPC Flow Logs, Security Groups apply</li>
+        <li>IP limit: tied to EC2 instance type's ENI/IP limits</li>
+        <li>Best for: all EKS clusters — it is the default and recommended choice</li>
+      </ul>
+    </div>
+
+    <div class="plugin-card">
+      <div class="ph"><h4>🐝 Cilium</h4><span class="badge badge-purple">eBPF-powered (Modern)</span></div>
+      <p>Next-generation CNI using eBPF (extended Berkeley Packet Filter) in the Linux kernel instead of iptables. Dramatically better performance and observability. Can completely replace kube-proxy. The fastest-growing CNI in production.</p>
+      <ul>
+        <li>eBPF-based — bypasses iptables entirely for packet processing</li>
+        <li>Hubble: built-in deep observability and network flow visibility</li>
+        <li>L7 (HTTP/gRPC-aware) network policies</li>
+        <li>Best for: high-performance production clusters, modern cloud-native stacks</li>
+      </ul>
+    </div>
+
+    <table class="summary-table" style="margin-top:20px">
+      <thead><tr><th>Plugin</th><th>Overlay</th><th>Network Policy</th><th>Performance</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>Flannel</td><td>VXLAN</td><td>❌ No</td><td>Medium</td><td>Learning / Dev</td></tr>
+        <tr><td>Calico</td><td>Optional (BGP/IPIP)</td><td>✅ Full</td><td>High</td><td>Production / On-prem</td></tr>
+        <tr><td>Weave Net</td><td>Mesh</td><td>✅ Full</td><td>Medium</td><td>Simple prod clusters</td></tr>
+        <tr><td>AWS VPC CNI</td><td>❌ None (native VPC)</td><td>Via Calico addon</td><td>Very High</td><td>All EKS clusters</td></tr>
+        <tr><td>Cilium</td><td>eBPF (no iptables)</td><td>✅ L3/L4/L7</td><td>Highest</td><td>Modern high-perf</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4 — EXPLORE AWS VPC CNI ON EKS -->
+  <!-- ============================================================ -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Explore AWS VPC CNI on EKS</h2>
+      <span class="tag">hands-on ~15 min</span>
+    </div>
+    <p class="desc">Your EKS cluster already has AWS VPC CNI installed. Let's inspect every layer of it — from DaemonSet to ENI to Pod IP.</p>
+
+    <div class="callout info">
+      <span class="icon">📋</span>
+      <div class="body"><strong>Prerequisites:</strong> Your EKS cluster is running and <code>kubectl</code> is configured. If not, run: <code>aws eks update-kubeconfig --region ap-south-1 --name my-eks-cluster</code></div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 1 — Inspect the aws-node DaemonSet</div>
+      <div class="step-body">
+        <p>AWS VPC CNI runs as a DaemonSet called <code>aws-node</code> in the <code>kube-system</code> namespace. It runs on every node and manages ENI attachments.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># See the aws-node DaemonSet — one pod per node</span>
+<span class="kw">kubectl</span> get daemonset aws-node <span class="flag">-n</span> kube-system
+
+<span class="cm"># See individual aws-node pods</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-n</span> kube-system <span class="flag">-l</span> k8s-app=aws-node <span class="flag">-o</span> wide</pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Expected Output</div>
+          <pre>NAME       DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE
+aws-node   2         2         2       2            2
+
+NAME             READY   STATUS    NODE
+aws-node-xxxxx   1/1     Running   ip-192-168-11-110...
+aws-node-yyyyy   1/1     Running   ip-192-168-42-251...</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 2 — Inspect the CNI config file on a node</div>
+      <div class="step-body">
+        <p>SSH into a worker node (or use a privileged debug pod) to see the actual CNI config file that kubelet reads.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Launch a debug pod with host network access on a node</span>
+<span class="kw">kubectl</span> run cni-debug \
+  <span class="flag">--image</span>=busybox \
+  <span class="flag">--restart</span>=Never \
+  <span class="flag">--rm</span> \
+  <span class="flag">-it</span> \
+  <span class="flag">--overrides</span>=<span class="str">'{"spec":{"hostNetwork":true,"hostPID":true,"containers":[{"name":"cni-debug","image":"busybox","command":["sh"],"stdin":true,"tty":true,"securityContext":{"privileged":true},"volumeMounts":[{"name":"cni","mountPath":"/etc/cni"}]}],"volumes":[{"name":"cni","hostPath":{"path":"/etc/cni"}}]}}'</span> \
+  -- sh</pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash (inside the debug pod)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># View the CNI config that kubelet reads</span>
+cat /etc/cni/net.d/10-aws.conflist</pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ You should see something like this</div>
+          <pre>{
+  "cniVersion": "0.3.1",
+  "name": "aws-cni",
+  "plugins": [
+    {
+      "name": "aws-cni",
+      "type": "aws-cni",         &lt;-- the CNI binary to call
+      "vethPrefix": "eni",       &lt;-- veth pairs named eni0, eni1, ...
+      "mtu": 9001,               &lt;-- jumbo frames on AWS
+      "pluginLogFile": "/var/log/aws-routed-eni/plugin.log"
+    },
+    {
+      "type": "portmap",         &lt;-- second chained plugin for port forwarding
+      "capabilities": {"portMappings": true}
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 3 — See how Pods get real VPC IPs</div>
+      <div class="step-body">
+        <p>Deploy a simple nginx pod and observe it gets a real VPC IP (in the 192.168.x.x range matching your node subnets).</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Deploy a test pod</span>
+<span class="kw">kubectl</span> run nginx-test <span class="flag">--image</span>=nginx <span class="flag">--restart</span>=Never
+
+<span class="cm"># Watch it get an IP — it will be a VPC subnet IP, not an overlay IP</span>
+<span class="kw">kubectl</span> get pod nginx-test <span class="flag">-o</span> wide</pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Expected — Pod IP is a real VPC IP</div>
+          <pre>NAME         READY   STATUS    IP               NODE
+nginx-test   1/1     Running   192.168.11.45    ip-192-168-11-110...
+                               ^^^^^^^^^^^^^^^^^
+                               This is a real VPC IP — no overlay!</pre>
+        </div>
+        <div class="callout tip">
+          <span class="icon">🌐</span>
+          <div class="body"><strong>Why this matters:</strong> Because the pod IP is a real VPC IP, you can reach this pod directly from any EC2 instance, RDS database, or Lambda function in your VPC — without any NAT or port-forwarding. This is the key advantage of AWS VPC CNI over overlay-based plugins.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 4 — Understand IP limits per node</div>
+      <div class="step-body">
+        <p>AWS VPC CNI has a hard limit on how many pods can run per node, based on the EC2 instance type's ENI capacity.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Check max pods per node (annotation set by aws-node)</span>
+<span class="kw">kubectl</span> get nodes <span class="flag">-o</span> jsonpath=<span class="str">'{range .items[*]}{.metadata.name}{"\t"}{.status.allocatable.pods}{"\n"}{end}'</span>
+
+<span class="cm"># See current pod count per node</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-A</span> <span class="flag">-o</span> wide <span class="flag">--field-selector</span> <span class="var">spec.nodeName</span>=<span class="str">&lt;node-name&gt;</span> | wc -l</pre>
+        </div>
+        <div class="callout warn">
+          <span class="icon">⚠️</span>
+          <div class="body"><strong>Formula:</strong> Max pods = (Number of ENIs × (IPs per ENI − 1)) + 2. For t3.small: 3 ENIs × (4 IPs − 1) + 2 = <strong>11 pods max</strong>. For production workloads, this limit is a key reason to choose larger instance types or enable prefix delegation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5 — POD-TO-POD NETWORKING -->
+  <!-- ============================================================ -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Pod-to-Pod Networking Deep Dive</h2>
+      <span class="tag">hands-on ~10 min</span>
+    </div>
+    <p class="desc">Prove that pods can talk to each other across nodes — and trace the exact packet path.</p>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 1 — Deploy two pods on different nodes</div>
+      <div class="step-body">
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — pod-a.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">v1</span>
+<span class="yn">kind</span>: <span class="yv">Pod</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">pod-a</span>
+  <span class="yn">labels</span>:
+    <span class="yn">app</span>: <span class="yv">pod-a</span>
+<span class="yn">spec</span>:
+  <span class="yn">affinity</span>:
+    <span class="yn">nodeAffinity</span>:
+      <span class="yn">requiredDuringSchedulingIgnoredDuringExecution</span>:
+        <span class="yn">nodeSelectorTerms</span>:
+        - <span class="yn">matchExpressions</span>:
+          - <span class="yn">key</span>: <span class="yv">kubernetes.io/hostname</span>
+            <span class="yn">operator</span>: <span class="yv">In</span>
+            <span class="yn">values</span>: [<span class="str">"&lt;NODE-1-NAME&gt;"</span>]  <span class="yc"># replace with first node name</span>
+  <span class="yn">containers</span>:
+  - <span class="yn">name</span>: <span class="yv">netshoot</span>
+    <span class="yn">image</span>: <span class="yv">nicolaka/netshoot</span>
+    <span class="yn">command</span>: [<span class="str">"sleep"</span>, <span class="str">"3600"</span>]</pre>
+        </div>
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — pod-b.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">v1</span>
+<span class="yn">kind</span>: <span class="yv">Pod</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">pod-b</span>
+<span class="yn">spec</span>:
+  <span class="yn">affinity</span>:
+    <span class="yn">nodeAffinity</span>:
+      <span class="yn">requiredDuringSchedulingIgnoredDuringExecution</span>:
+        <span class="yn">nodeSelectorTerms</span>:
+        - <span class="yn">matchExpressions</span>:
+          - <span class="yn">key</span>: <span class="yv">kubernetes.io/hostname</span>
+            <span class="yn">operator</span>: <span class="yv">In</span>
+            <span class="yn">values</span>: [<span class="str">"&lt;NODE-2-NAME&gt;"</span>]  <span class="yc"># replace with second node name</span>
+  <span class="yn">containers</span>:
+  - <span class="yn">name</span>: <span class="yv">nginx</span>
+    <span class="yn">image</span>: <span class="yv">nginx</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Get node names first</span>
+<span class="kw">kubectl</span> get nodes
+
+<span class="cm"># Apply both pods (after filling in node names above)</span>
+<span class="kw">kubectl</span> apply <span class="flag">-f</span> pod-a.yaml
+<span class="kw">kubectl</span> apply <span class="flag">-f</span> pod-b.yaml
+
+<span class="cm"># Verify they are on different nodes</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-o</span> wide</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 2 — Test cross-node pod communication</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Get pod-b's IP</span>
+<span class="var">POD_B_IP</span>=$(<span class="kw">kubectl</span> get pod pod-b <span class="flag">-o</span> jsonpath=<span class="str">'{.status.podIP}'</span>)
+echo <span class="str">"pod-b IP: $POD_B_IP"</span>
+
+<span class="cm"># Exec into pod-a and ping pod-b (cross-node!)</span>
+<span class="kw">kubectl</span> exec <span class="flag">-it</span> pod-a -- ping <span class="flag">-c</span> 4 <span class="var">$POD_B_IP</span>
+
+<span class="cm"># Curl nginx on pod-b from pod-a</span>
+<span class="kw">kubectl</span> exec <span class="flag">-it</span> pod-a -- curl <span class="flag">-s</span> <span class="var">$POD_B_IP</span> | head -5</pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Expected — Cross-node ping works!</div>
+          <pre>PING 192.168.42.67 (192.168.42.67): 56 data bytes
+64 bytes from 192.168.42.67: seq=0 ttl=253 time=0.412 ms
+64 bytes from 192.168.42.67: seq=1 ttl=253 time=0.389 ms
+
+This proves pod-to-pod cross-node networking works with NO NAT.
+TTL=253 means 3 hops: pod → node1 → VPC → node2 → pod</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 3 — Inspect routing inside a pod</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Look at pod-a's network interfaces</span>
+<span class="kw">kubectl</span> exec pod-a -- ip addr
+
+<span class="cm"># Look at pod-a's routing table</span>
+<span class="kw">kubectl</span> exec pod-a -- ip route
+
+<span class="cm"># Trace route from pod-a to pod-b</span>
+<span class="kw">kubectl</span> exec pod-a -- traceroute <span class="var">$POD_B_IP</span></pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ What you'll see inside pod-a</div>
+          <pre>ip addr:
+  eth0: 192.168.11.45/32   &lt;-- /32 — single IP, AWS VPC style
+
+ip route:
+  default via 169.254.1.1 dev eth0     &lt;-- link-local gateway
+  169.254.1.1 dev eth0 scope link      &lt;-- ARP proxy on node
+
+traceroute to 192.168.42.67:
+  1  169.254.1.1    &lt;-- node's ARP proxy (veth gateway)
+  2  192.168.42.67  &lt;-- pod-b directly via VPC routing!</pre>
+        </div>
+        <div class="callout info">
+          <span class="icon">🔍</span>
+          <div class="body"><strong>The 169.254.1.1 trick:</strong> AWS VPC CNI uses a link-local address (169.254.1.1) as a proxy ARP gateway inside the pod. When pod-a wants to send traffic to any destination, it sends to 169.254.1.1, and the host-side veth responds to ARP with its own MAC. The host then routes the traffic through the VPC.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6 — NETWORK POLICIES CONCEPT -->
+  <!-- ============================================================ -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Kubernetes Network Policies</h2>
+      <span class="tag">theory + concept</span>
+    </div>
+    <p class="desc">By default, all pods can talk to all pods. Network Policies are Kubernetes's firewall rules at the pod level.</p>
+
+    <div class="concept-card">
+      <h4><span class="label">ANALOGY</span>Office Building Access Cards</h4>
+      <p>
+        Without Network Policies, the Kubernetes cluster is like an open-plan office — anyone can walk to any desk and talk to anyone.
+        <br><br>
+        Network Policies are like <strong>access card zones</strong>. You can say: "Only people from the HR team can enter the Finance department. Contractors can only access the lobby."
+        <br><br>
+        In Kubernetes terms: "Only pods with label <code>app=frontend</code> can connect to pods with label <code>app=database</code> on port 5432."
+      </p>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Network Policy Key Concepts</div>
+      <div class="step-body">
+        <div class="grid2">
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// podSelector</h4>
+            <p>Which pods this policy applies TO (the target). Uses label selectors. Empty selector <code>{}</code> means "all pods in this namespace".</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// policyTypes</h4>
+            <p>Whether the policy controls Ingress (incoming), Egress (outgoing), or both. If you specify Ingress, only that direction is controlled.</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// ingress / egress rules</h4>
+            <p>A whitelist of allowed traffic. If a NetworkPolicy selects a pod, ALL traffic not explicitly allowed is <strong>denied</strong>. No policy = allow all.</p>
+          </div>
+          <div class="arch-card" style="margin-bottom:0">
+            <h4>// namespaceSelector</h4>
+            <p>Allow traffic from specific namespaces (e.g., only from the <code>monitoring</code> namespace). Combines with podSelector for fine-grained control.</p>
+          </div>
+        </div>
+        <div class="callout danger" style="margin-top:14px">
+          <span class="icon">⚠️</span>
+          <div class="body"><strong>Critical:</strong> Network Policies are <strong>additive whitelists</strong>. As soon as any NetworkPolicy selects a pod, all traffic to/from that pod is denied by default. You must explicitly allow what you want. A common mistake is creating a policy that accidentally blocks all egress (including DNS!), breaking the pod.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7 — INSTALL CALICO ON EKS -->
+  <!-- ============================================================ -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <h2>Install Calico for Network Policy on EKS</h2>
+      <span class="tag">hands-on ~10 min</span>
+    </div>
+    <p class="desc">AWS VPC CNI handles pod IP assignment but has no built-in Network Policy enforcement. We add Calico as the policy engine (not as the CNI — just the policy controller).</p>
+
+    <div class="callout info">
+      <span class="icon">💡</span>
+      <div class="body"><strong>How this works:</strong> We keep AWS VPC CNI for pod networking (IP allocation, routing). We add Calico in "policy-only" mode. Calico installs iptables rules on each node to enforce NetworkPolicy objects. Two components, working together.</div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 1 — Install Calico operator</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Install the Calico operator from Tigera</span>
+<span class="kw">kubectl</span> create <span class="flag">-f</span> https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
+
+<span class="cm"># Wait for the operator to be ready</span>
+<span class="kw">kubectl</span> rollout status deployment tigera-operator <span class="flag">-n</span> tigera-operator</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 2 — Apply Calico Installation config for EKS</div>
+      <div class="step-body">
+        <p>Create the Installation resource telling Calico to work in policy-only mode (no CNI, just policy enforcement).</p>
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — calico-eks.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">operator.tigera.io/v1</span>
+<span class="yn">kind</span>: <span class="yv">Installation</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">default</span>
+<span class="yn">spec</span>:
+  <span class="yn">cni</span>:
+    <span class="yn">type</span>: <span class="yv">AmazonVPC</span>      <span class="yc"># Keep AWS VPC CNI for IP allocation</span>
+  <span class="yn">calicoNetwork</span>:
+    <span class="yn">bgp</span>: <span class="yv">Disabled</span>         <span class="yc"># No BGP needed — AWS VPC handles routing</span>
+---
+<span class="yn">apiVersion</span>: <span class="yv">operator.tigera.io/v1</span>
+<span class="yn">kind</span>: <span class="yv">APIServer</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">default</span>
+<span class="yn">spec</span>: {}</pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="kw">kubectl</span> apply <span class="flag">-f</span> calico-eks.yaml
+
+<span class="cm"># Watch Calico components come up</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-n</span> calico-system <span class="flag">-w</span></pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Expected — Calico pods running</div>
+          <pre>NAME                                       READY   STATUS
+calico-kube-controllers-xxx                1/1     Running
+calico-node-aaaaa                          1/1     Running   &lt;-- DaemonSet, one per node
+calico-node-bbbbb                          1/1     Running
+calico-typha-xxx                           1/1     Running</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 3 — Verify Calico is enforcing policies</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Check that calico-node DaemonSet is on all nodes</span>
+<span class="kw">kubectl</span> get daemonset calico-node <span class="flag">-n</span> calico-system
+
+<span class="cm"># Verify Calico can see your cluster's pods</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-A</span> <span class="flag">-o</span> wide | head -10</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8 — NETWORK POLICY LAB -->
+  <!-- ============================================================ -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <h2>Hands-On Network Policy Lab</h2>
+      <span class="tag">hands-on ~20 min</span>
+    </div>
+    <p class="desc">Build a 3-tier app (frontend → backend → database) and use NetworkPolicy to enforce that only the correct tiers can communicate.</p>
+
+    <div class="arch-card">
+      <h4>// Lab Architecture</h4>
+      <p>
+        <strong style="color:var(--accent)">frontend</strong> (nginx) — can reach backend on port 8080<br>
+        <strong style="color:var(--accent2)">backend</strong> (httpd) — can reach database on port 5432<br>
+        <strong style="color:var(--purple)">database</strong> (postgres) — only accepts connections from backend<br>
+        <strong style="color:var(--accent4)">Rule:</strong> frontend CANNOT reach database directly.
+      </p>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 1 — Create the app namespace and deployments</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Create a dedicated namespace</span>
+<span class="kw">kubectl</span> create namespace app-demo
+
+<span class="cm"># Deploy frontend (nginx)</span>
+<span class="kw">kubectl</span> run frontend <span class="flag">--image</span>=nginx <span class="flag">--labels</span>=<span class="str">"app=frontend,tier=web"</span> <span class="flag">-n</span> app-demo
+
+<span class="cm"># Deploy backend (httpd acting as our app server)</span>
+<span class="kw">kubectl</span> run backend <span class="flag">--image</span>=httpd <span class="flag">--labels</span>=<span class="str">"app=backend,tier=app"</span> <span class="flag">-n</span> app-demo
+
+<span class="cm"># Deploy database (postgres)</span>
+<span class="kw">kubectl</span> run database \
+  <span class="flag">--image</span>=postgres:15 \
+  <span class="flag">--labels</span>=<span class="str">"app=database,tier=db"</span> \
+  <span class="flag">--env</span>=<span class="str">"POSTGRES_PASSWORD=secret"</span> \
+  <span class="flag">-n</span> app-demo
+
+<span class="kw">kubectl</span> get pods <span class="flag">-n</span> app-demo <span class="flag">-o</span> wide</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 2 — Verify all pods can talk before applying policies (baseline)</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="var">DB_IP</span>=$(<span class="kw">kubectl</span> get pod database <span class="flag">-n</span> app-demo <span class="flag">-o</span> jsonpath=<span class="str">'{.status.podIP}'</span>)
+echo <span class="str">"DB IP: $DB_IP"</span>
+
+<span class="cm"># Try reaching database from frontend — should WORK before policy</span>
+<span class="kw">kubectl</span> exec <span class="flag">-n</span> app-demo frontend -- curl <span class="flag">-s</span> <span class="flag">--connect-timeout</span> 3 <span class="var">$DB_IP</span>:5432 \
+  &amp;&amp; echo <span class="str">"✅ Connected (no policy yet)"</span> || echo <span class="str">"❌ Blocked"</span></pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Before policy — connection succeeds (default allow-all)</div>
+          <pre>✅ Connected (no policy yet)   &lt;-- This is the security gap we'll fix</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 3 — Apply the default-deny policy to the namespace</div>
+      <div class="step-body">
+        <p>First, lock down all traffic. Then explicitly open only what's needed.</p>
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — default-deny.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">networking.k8s.io/v1</span>
+<span class="yn">kind</span>: <span class="yv">NetworkPolicy</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">default-deny-all</span>
+  <span class="yn">namespace</span>: <span class="yv">app-demo</span>
+<span class="yn">spec</span>:
+  <span class="yn">podSelector</span>: {}          <span class="yc"># {} = select ALL pods in this namespace</span>
+  <span class="yn">policyTypes</span>:
+  - <span class="yv">Ingress</span>
+  - <span class="yv">Egress</span>
+  <span class="yc"># No ingress or egress rules = deny everything</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="kw">kubectl</span> apply <span class="flag">-f</span> default-deny.yaml
+
+<span class="cm"># Verify database is now unreachable from frontend</span>
+<span class="kw">kubectl</span> exec <span class="flag">-n</span> app-demo frontend -- curl <span class="flag">-s</span> <span class="flag">--connect-timeout</span> 3 <span class="var">$DB_IP</span>:5432 \
+  &amp;&amp; echo <span class="str">"✅ Connected"</span> || echo <span class="str">"❌ Blocked — policy works!"</span></pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ After deny-all — database is now blocked from frontend</div>
+          <pre>❌ Blocked — policy works!</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 4 — Allow DNS egress (or all pods break)</div>
+      <div class="step-body">
+        <p>Deny-all blocks DNS too. Allow it explicitly so pods can resolve names.</p>
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — allow-dns.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">networking.k8s.io/v1</span>
+<span class="yn">kind</span>: <span class="yv">NetworkPolicy</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">allow-dns-egress</span>
+  <span class="yn">namespace</span>: <span class="yv">app-demo</span>
+<span class="yn">spec</span>:
+  <span class="yn">podSelector</span>: {}             <span class="yc"># all pods in namespace</span>
+  <span class="yn">policyTypes</span>: [<span class="yv">Egress</span>]
+  <span class="yn">egress</span>:
+  - <span class="yn">ports</span>:
+    - <span class="yn">protocol</span>: <span class="yv">UDP</span>
+      <span class="yn">port</span>: <span class="yv">53</span>                <span class="yc"># DNS</span>
+    - <span class="yn">protocol</span>: <span class="yv">TCP</span>
+      <span class="yn">port</span>: <span class="yv">53</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="kw">kubectl</span> apply <span class="flag">-f</span> allow-dns.yaml</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 5 — Allow backend → database on port 5432</div>
+      <div class="step-body">
+        <div class="yaml-block">
+          <div class="code-header"><span class="code-lang">yaml — allow-backend-to-db.yaml</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="yn">apiVersion</span>: <span class="yv">networking.k8s.io/v1</span>
+<span class="yn">kind</span>: <span class="yv">NetworkPolicy</span>
+<span class="yn">metadata</span>:
+  <span class="yn">name</span>: <span class="yv">allow-backend-to-database</span>
+  <span class="yn">namespace</span>: <span class="yv">app-demo</span>
+<span class="yn">spec</span>:
+  <span class="yn">podSelector</span>:
+    <span class="yn">matchLabels</span>:
+      <span class="yn">app</span>: <span class="yv">database</span>          <span class="yc"># This policy protects the database pod</span>
+  <span class="yn">policyTypes</span>: [<span class="yv">Ingress</span>]
+  <span class="yn">ingress</span>:
+  - <span class="yn">from</span>:
+    - <span class="yn">podSelector</span>:
+        <span class="yn">matchLabels</span>:
+          <span class="yn">app</span>: <span class="yv">backend</span>        <span class="yc"># ONLY backend pods can connect</span>
+    <span class="yn">ports</span>:
+    - <span class="yn">protocol</span>: <span class="yv">TCP</span>
+      <span class="yn">port</span>: <span class="yv">5432</span></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="kw">kubectl</span> apply <span class="flag">-f</span> allow-backend-to-db.yaml
+
+<span class="cm"># backend CAN now reach database</span>
+<span class="var">DB_IP</span>=$(<span class="kw">kubectl</span> get pod database <span class="flag">-n</span> app-demo <span class="flag">-o</span> jsonpath=<span class="str">'{.status.podIP}'</span>)
+<span class="kw">kubectl</span> exec <span class="flag">-n</span> app-demo backend -- curl <span class="flag">-s</span> <span class="flag">--connect-timeout</span> 3 <span class="var">$DB_IP</span>:5432 \
+  &amp;&amp; echo <span class="str">"✅ backend can reach database"</span> || echo <span class="str">"❌ Blocked"</span>
+
+<span class="cm"># frontend STILL CANNOT reach database — policy enforced!</span>
+<span class="kw">kubectl</span> exec <span class="flag">-n</span> app-demo frontend -- curl <span class="flag">-s</span> <span class="flag">--connect-timeout</span> 3 <span class="var">$DB_IP</span>:5432 \
+  &amp;&amp; echo <span class="str">"✅ Connected (BAD!)"</span> || echo <span class="str">"❌ Blocked — frontend correctly denied!"</span></pre>
+        </div>
+        <div class="verify-box">
+          <div class="title">✓ Final Verification — Zero-trust between tiers works</div>
+          <pre>✅ backend can reach database
+❌ Blocked — frontend correctly denied!
+
+Your 3-tier network isolation is now working correctly.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Step 6 — Inspect all NetworkPolicies</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># List all policies in namespace</span>
+<span class="kw">kubectl</span> get networkpolicy <span class="flag">-n</span> app-demo
+
+<span class="cm"># Describe a specific policy</span>
+<span class="kw">kubectl</span> describe networkpolicy allow-backend-to-database <span class="flag">-n</span> app-demo</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 9 — TROUBLESHOOTING -->
+  <!-- ============================================================ -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <h2>Troubleshooting CNI Issues</h2>
+      <span class="tag">reference</span>
+    </div>
+    <p class="desc">Common CNI and networking problems you will encounter — and exactly how to diagnose and fix them.</p>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Problem: Pod stuck in ContainerCreating — CNI not working</div>
+      <div class="step-body">
+        <p>The most common CNI issue. Pod is scheduled but never gets an IP.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash — Diagnosis</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Step 1: See the exact error</span>
+<span class="kw">kubectl</span> describe pod <span class="var">&lt;pod-name&gt;</span> | grep <span class="flag">-A</span> 10 Events
+
+<span class="cm"># Step 2: Check kubelet logs on the node</span>
+<span class="kw">kubectl</span> get events <span class="flag">--field-selector</span> <span class="var">involvedObject.name</span>=<span class="var">&lt;pod-name&gt;</span> <span class="flag">--sort-by</span>=<span class="str">'.lastTimestamp'</span>
+
+<span class="cm"># Step 3: Check aws-node pod logs on that node</span>
+<span class="var">NODE</span>=$(<span class="kw">kubectl</span> get pod <span class="var">&lt;pod-name&gt;</span> <span class="flag">-o</span> jsonpath=<span class="str">'{.spec.nodeName}'</span>)
+<span class="kw">kubectl</span> logs <span class="flag">-n</span> kube-system <span class="flag">-l</span> k8s-app=aws-node <span class="flag">--field-selector</span> <span class="var">spec.nodeName</span>=<span class="var">$NODE</span>
+
+<span class="cm"># Step 4: Check if CNI binaries exist on the node</span>
+<span class="cm"># (using a privileged pod on that node)</span>
+ls /opt/cni/bin/
+ls /etc/cni/net.d/</pre>
+        </div>
+        <div class="callout warn">
+          <span class="icon">🔧</span>
+          <div class="body"><strong>Common causes:</strong> aws-node DaemonSet pod is crashing (check its logs), ENI IP exhaustion (node has no more IPs to give), missing IAM permissions for the node's role (needs <code>AmazonEKS_CNI_Policy</code>), or CNI config file missing/malformed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Problem: Pod can't resolve DNS (name lookup fails)</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash — Diagnosis</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Test DNS resolution from inside a pod</span>
+<span class="kw">kubectl</span> exec <span class="flag">-it</span> <span class="var">&lt;pod&gt;</span> -- nslookup kubernetes.default
+
+<span class="cm"># Check CoreDNS pods are running</span>
+<span class="kw">kubectl</span> get pods <span class="flag">-n</span> kube-system <span class="flag">-l</span> k8s-app=kube-dns
+
+<span class="cm"># Check CoreDNS logs for errors</span>
+<span class="kw">kubectl</span> logs <span class="flag">-n</span> kube-system <span class="flag">-l</span> k8s-app=kube-dns
+
+<span class="cm"># Check resolv.conf inside the pod</span>
+<span class="kw">kubectl</span> exec <span class="flag">-it</span> <span class="var">&lt;pod&gt;</span> -- cat /etc/resolv.conf</pre>
+        </div>
+        <div class="callout tip">
+          <span class="icon">💡</span>
+          <div class="body"><strong>Quick fix:</strong> If you applied a default-deny NetworkPolicy, you must also add a rule allowing UDP/TCP port 53 egress to the kube-system namespace (where CoreDNS lives). This is the #1 mistake when implementing deny-all policies.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Problem: Pod-to-pod connectivity broken across nodes</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash — Diagnosis</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Test connectivity step by step</span>
+<span class="cm"># 1. Can pods on the SAME node talk?</span>
+<span class="kw">kubectl</span> exec pod-a -- ping <span class="flag">-c</span> 2 <span class="var">$SAME_NODE_POD_IP</span>
+
+<span class="cm"># 2. Can pods on DIFFERENT nodes talk?</span>
+<span class="kw">kubectl</span> exec pod-a -- ping <span class="flag">-c</span> 2 <span class="var">$DIFF_NODE_POD_IP</span>
+
+<span class="cm"># 3. Check VPC route tables in AWS console — each node's subnet</span>
+<span class="cm">#    must have routes for the pod CIDR</span>
+<span class="kw">aws</span> ec2 describe-route-tables \
+  <span class="flag">--filters</span> <span class="str">"Name=tag:kubernetes.io/cluster/my-eks-cluster,Values=owned"</span> \
+  <span class="flag">--region</span> ap-south-1
+
+<span class="cm"># 4. Check Security Groups — node SGs must allow all traffic</span>
+<span class="cm">#    between nodes (TCP/UDP all ports within the cluster SG)</span>
+<span class="kw">aws</span> ec2 describe-security-groups \
+  <span class="flag">--filters</span> <span class="str">"Name=tag:aws:eks:cluster-name,Values=my-eks-cluster"</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Problem: Debugging a NetworkPolicy — is it blocking?</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash — Diagnosis</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Check which policies apply to a pod</span>
+<span class="kw">kubectl</span> get networkpolicy <span class="flag">-n</span> <span class="var">&lt;namespace&gt;</span> <span class="flag">-o</span> yaml
+
+<span class="cm"># Check iptables rules that Calico installed (on the node)</span>
+<span class="cm"># (run inside a privileged pod on that node)</span>
+iptables <span class="flag">-L</span> <span class="flag">-n</span> | grep cali
+
+<span class="cm"># Use netshoot pod for comprehensive network debugging</span>
+<span class="kw">kubectl</span> run netshoot <span class="flag">--rm</span> <span class="flag">-it</span> <span class="flag">--image</span>=nicolaka/netshoot <span class="flag">-n</span> <span class="var">&lt;namespace&gt;</span> -- bash
+
+<span class="cm"># Inside netshoot — test specific port connectivity</span>
+nc <span class="flag">-zv</span> <span class="var">&lt;target-ip&gt;</span> <span class="var">&lt;port&gt;</span>     <span class="cm"># TCP port test</span>
+curl <span class="flag">-v</span> <span class="flag">--connect-timeout</span> 3 <span class="var">&lt;target-ip&gt;</span>:<span class="var">&lt;port&gt;</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <table class="summary-table" style="margin-top:16px">
+      <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>ContainerCreating forever</td><td>CNI not installed or aws-node crash</td><td>Check aws-node pod logs</td></tr>
+        <tr><td>No IP assigned to pod</td><td>ENI IP exhaustion on node</td><td>Scale up nodes or use larger instance type</td></tr>
+        <tr><td>DNS broken</td><td>NetworkPolicy blocks UDP 53</td><td>Add allow-dns-egress policy</td></tr>
+        <tr><td>Cross-node ping fails</td><td>Security Group missing intra-node rule</td><td>Add all-traffic rule within cluster SG</td></tr>
+        <tr><td>Service unreachable</td><td>kube-proxy or iptables issue</td><td>Restart kube-proxy DaemonSet</td></tr>
+        <tr><td>NetworkPolicy not enforced</td><td>No CNI policy engine installed</td><td>Install Calico (policy-only mode)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 10 — CLEANUP -->
+  <!-- ============================================================ -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2>Cleanup</h2>
+      <span class="tag">~5 min</span>
+    </div>
+    <p class="desc">Remove all lab resources. Keep the cluster if you plan to continue with other labs.</p>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Remove lab resources (keep cluster)</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="cm"># Delete the app namespace (removes all pods + network policies inside)</span>
+<span class="kw">kubectl</span> delete namespace app-demo
+
+<span class="cm"># Delete the test pods from earlier sections</span>
+<span class="kw">kubectl</span> delete pod pod-a pod-b nginx-test --ignore-not-found
+
+<span class="cm"># Remove Calico (if you want to go back to no policy engine)</span>
+<span class="kw">kubectl</span> delete <span class="flag">-f</span> calico-eks.yaml
+<span class="kw">kubectl</span> delete <span class="flag">-f</span> https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="dot"></span> Delete entire EKS cluster (if done with all labs)</div>
+      <div class="step-body">
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+          <pre><span class="kw">eksctl</span> delete cluster \
+  <span class="flag">--name</span> my-eks-cluster \
+  <span class="flag">--region</span> ap-south-1</pre>
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="icon">⏳</span>
+          <div class="body">Deletion takes 10–15 minutes. eksctl removes CloudFormation stacks, node groups, VPC, and IAM roles in the correct order.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- LAB SUMMARY -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num" style="background:var(--accent2)">✓</div>
+      <h2>Lab Summary</h2>
+    </div>
+    <table class="summary-table">
+      <thead><tr><th>Concept</th><th>What You Learned</th><th>Key Command</th></tr></thead>
+      <tbody>
+        <tr><td>CNI Spec</td><td>Standard interface between kubelet and network plugins</td><td>cat /etc/cni/net.d/10-aws.conflist</td></tr>
+        <tr><td>AWS VPC CNI</td><td>Pods get real VPC IPs from ENIs — no overlay</td><td>kubectl get ds aws-node -n kube-system</td></tr>
+        <tr><td>veth pair</td><td>Linux virtual cable wiring pod to node network</td><td>kubectl exec pod-a -- ip link</td></tr>
+        <tr><td>Pod-to-Pod</td><td>Cross-node communication works without NAT</td><td>kubectl exec pod-a -- ping $POD_B_IP</td></tr>
+        <tr><td>NetworkPolicy</td><td>Kubernetes firewall rules — additive whitelist</td><td>kubectl get networkpolicy -n app-demo</td></tr>
+        <tr><td>Calico</td><td>Policy enforcement engine alongside AWS VPC CNI</td><td>kubectl get pods -n calico-system</td></tr>
+        <tr><td>Default Deny</td><td>podSelector: {} with no rules blocks all traffic</td><td>kubectl describe netpol default-deny-all</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip" style="margin-top:16px">
+      <span class="icon">🚀</span>
+      <div class="body"><strong>Next steps:</strong> Try Cilium CNI for eBPF-based networking, explore Calico GlobalNetworkPolicy for cross-namespace rules, set up Hubble for network flow observability, or implement egress policies to control outbound internet access from pods.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    CNI Lab Guide &nbsp;·&nbsp; AWS EKS + AWS VPC CNI + Calico &nbsp;·&nbsp; Kubernetes Networking Deep Dive
+  </div>
+
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block, .yaml-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'copy';
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
+</script>
+</body>
+</html>
