@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Interview Questions (1&ndash;3 Yrs DevOps) &mdash; 100 Questions</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --border: #e3e6ea;
+    --text-primary: #1a1d23;
+    --text-secondary: #5b6270;
+    --accent: #326ce5;
+    --accent-light: #eaf1ff;
+    --accent-soft: #dbe6ff;
+    --tag-bg: #f1f5f9;
+    --shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06);
+    --shadow-hover: 0 4px 10px rgba(16,24,40,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #0b1f3a 0%, #14498f 55%, #326ce5 100%);
+    color: #fff;
+    padding: 56px 24px 64px;
+    text-align: center;
+  }
+
+  header.hero h1 {
+    margin: 0 0 12px;
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header.hero p {
+    margin: 0 auto;
+    max-width: 720px;
+    color: #cbd5e1;
+    font-size: 15px;
+  }
+
+  .hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+
+  .hero-badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: #e2e8f0;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: -34px auto 60px;
+    padding: 0 20px;
+  }
+
+  nav.toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    margin-bottom: 36px;
+  }
+
+  nav.toc h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+  }
+
+  .toc-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14.5px;
+    transition: background 0.15s ease;
+  }
+
+  .toc-link:hover { background: var(--accent-light); }
+
+  .toc-count {
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    padding: 2px 9px;
+    border-radius: 999px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 44px 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-soft);
+    color: #0f172a;
+  }
+
+  .q-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .q-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .q-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  .q-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .q-num {
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    background: var(--accent);
+    padding: 2px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+
+  .q-tag {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    background: var(--tag-bg);
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .q-text {
+    margin: 0;
+    font-size: 15.5px;
+    color: var(--text-primary);
+    line-height: 1.55;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    padding: 30px 20px 50px;
+  }
+
+  @media print {
+    header.hero { background: #14498f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .q-card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Kubernetes Interview Questions</h1>
+  <p>A curated set of 100 Kubernetes interview questions for DevOps candidates with 1&ndash;3 years of experience &mdash; covering architecture, workloads, networking, storage, scheduling, kubectl/Helm, RBAC/security, and real-world troubleshooting.</p>
+  <div class="hero-badges">
+    <span class="hero-badge">100 Questions</span>
+    <span class="hero-badge">1&ndash;3 Yrs DevOps</span>
+    <span class="hero-badge">Cluster Ops Focus</span>
+    <span class="hero-badge">Light Theme</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <h3>Jump to Section</h3>
+    <a href="#sec-kubernetes-fundamentals-and-architecture" class="toc-link">Kubernetes Fundamentals &amp; Architecture <span class="toc-count">20</span></a>
+<a href="#sec-pods-deployments-and-workload-controllers" class="toc-link">Pods, Deployments &amp; Workload Controllers <span class="toc-count">21</span></a>
+<a href="#sec-services-and-networking" class="toc-link">Services &amp; Networking <span class="toc-count">14</span></a>
+<a href="#sec-configmaps-secrets-and-storage" class="toc-link">ConfigMaps, Secrets &amp; Storage <span class="toc-count">8</span></a>
+<a href="#sec-scheduling-scaling-and-resource-management" class="toc-link">Scheduling, Scaling &amp; Resource Management <span class="toc-count">9</span></a>
+<a href="#sec-kubectl-yaml-and-cluster-operations" class="toc-link">kubectl, YAML &amp; Cluster Operations <span class="toc-count">13</span></a>
+<a href="#sec-security-and-rbac" class="toc-link">Security &amp; RBAC <span class="toc-count">9</span></a>
+<a href="#sec-real-world-troubleshooting-and-cluster-scenarios" class="toc-link">Real-World Troubleshooting &amp; Cluster Scenarios <span class="toc-count">6</span></a>
+  </nav>
+
+  <h2 id="sec-kubernetes-fundamentals-and-architecture" class="section-title">Kubernetes Fundamentals &amp; Architecture</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q1</span>
+            <span class="q-tag">Asked at Amazon &middot; 2023</span>
+          </div>
+          <p class="q-text">What is Kubernetes, and what problem does it solve that Docker alone doesn&#x27;t?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q2</span>
+            <span class="q-tag">Asked at Microsoft &middot; 2023</span>
+          </div>
+          <p class="q-text">Explain the Kubernetes control plane components — API server, etcd, scheduler, and controller manager.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q3</span>
+            <span class="q-tag">Asked at Google &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the role of the kubelet and kube-proxy on a worker node?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q4</span>
+            <span class="q-tag">Asked at Accenture &middot; 2024</span>
+          </div>
+          <p class="q-text">What is the difference between a Pod and a container?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q5</span>
+            <span class="q-tag">Asked at TCS &middot; 2024</span>
+          </div>
+          <p class="q-text">Why does Kubernetes use Pods instead of scheduling containers directly?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q6</span>
+            <span class="q-tag">Asked at Infosys &middot; 2024</span>
+          </div>
+          <p class="q-text">What is etcd, and why is it critical to a Kubernetes cluster&#x27;s health?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q7</span>
+            <span class="q-tag">Asked at Wipro &middot; 2025</span>
+          </div>
+          <p class="q-text">What happens when you run `kubectl apply -f deployment.yaml`? Walk through the flow end to end.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q8</span>
+            <span class="q-tag">Asked at Cognizant &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the difference between the declarative and imperative approaches in Kubernetes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q9</span>
+            <span class="q-tag">Asked at Deloitte &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a Kubernetes namespace, and when would you use multiple namespaces in a cluster?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q10</span>
+            <span class="q-tag">Asked at JPMorgan Chase &middot; 2026</span>
+          </div>
+          <p class="q-text">What is the difference between a master node and a worker node?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q11</span>
+            <span class="q-tag">Asked at Walmart Labs &middot; 2026</span>
+          </div>
+          <p class="q-text">What is the Kubernetes API server, and why is it considered the front door to the cluster?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q12</span>
+            <span class="q-tag">Asked at Flipkart &middot; 2026</span>
+          </div>
+          <p class="q-text">How does the scheduler decide which node a Pod should run on?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q13</span>
+            <span class="q-tag">Asked at Paytm &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a control loop / reconciliation loop in Kubernetes controllers?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q14</span>
+            <span class="q-tag">Asked at Swiggy &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the difference between Kubernetes and Docker Swarm?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q15</span>
+            <span class="q-tag">Asked at Zomato &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a kubeconfig file, and what does it contain?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q16</span>
+            <span class="q-tag">Asked at HCLTech &middot; 2024</span>
+          </div>
+          <p class="q-text">How do you check the health/status of all nodes in a cluster?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q17</span>
+            <span class="q-tag">Asked at Capgemini &middot; 2024</span>
+          </div>
+          <p class="q-text">What is the difference between `kubectl get`, `kubectl describe`, and `kubectl explain`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q18</span>
+            <span class="q-tag">Asked at IBM &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a static Pod, and how is it different from a regular Pod?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q19</span>
+            <span class="q-tag">Asked at Oracle &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the Container Runtime Interface (CRI), and which runtimes have you worked with?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q20</span>
+            <span class="q-tag">Asked at Genpact &middot; 2025</span>
+          </div>
+          <p class="q-text">How would you explain Kubernetes&#x27; self-healing capability with a real example?</p>
+        </div>
+</div>
+<h2 id="sec-pods-deployments-and-workload-controllers" class="section-title">Pods, Deployments &amp; Workload Controllers</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q21</span>
+            <span class="q-tag">Asked at Tech Mahindra &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the difference between a Deployment, a ReplicaSet, and a Pod?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q22</span>
+            <span class="q-tag">Asked at LTIMindtree &middot; 2026</span>
+          </div>
+          <p class="q-text">Write a simple Deployment YAML for an Nginx application with 3 replicas.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q23</span>
+            <span class="q-tag">Asked at Cisco &middot; 2026</span>
+          </div>
+          <p class="q-text">What is a rolling update, and how does a Deployment perform one by default?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q24</span>
+            <span class="q-tag">Asked at VMware &middot; 2026</span>
+          </div>
+          <p class="q-text">How do you roll back a Deployment to a previous revision?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q25</span>
+            <span class="q-tag">Asked at Dell &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the difference between `maxSurge` and `maxUnavailable` in a rolling update strategy?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q26</span>
+            <span class="q-tag">Asked at Adobe &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a DaemonSet, and give a real-world use case for one.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q27</span>
+            <span class="q-tag">Asked at PayPal &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a StatefulSet, and how is it different from a Deployment?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q28</span>
+            <span class="q-tag">Asked at Freshworks &middot; 2024</span>
+          </div>
+          <p class="q-text">Why do StatefulSets need a headless Service, and what does that mean?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q29</span>
+            <span class="q-tag">Asked at Razorpay &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a Job in Kubernetes, and how is it different from a CronJob?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q30</span>
+            <span class="q-tag">Asked at Myntra &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you run a one-time database migration task in Kubernetes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q31</span>
+            <span class="q-tag">Asked at Nagarro &middot; 2025</span>
+          </div>
+          <p class="q-text">What are init containers, and when would you use one instead of a regular container?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q32</span>
+            <span class="q-tag">Asked at Publicis Sapient &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a sidecar container? Give a practical example you&#x27;ve implemented or seen.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q33</span>
+            <span class="q-tag">Asked at EPAM Systems &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the difference between liveness, readiness, and startup probes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q34</span>
+            <span class="q-tag">Asked at ThoughtWorks &middot; 2026</span>
+          </div>
+          <p class="q-text">What happens to a Pod if its liveness probe keeps failing?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q35</span>
+            <span class="q-tag">Asked at Persistent Systems &middot; 2026</span>
+          </div>
+          <p class="q-text">How do you set resource `requests` and `limits` for a container, and why do both matter?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q36</span>
+            <span class="q-tag">Asked at Mphasis &middot; 2026</span>
+          </div>
+          <p class="q-text">What is the OOMKilled status, and how would you troubleshoot a Pod hitting it?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q37</span>
+            <span class="q-tag">Asked at Hexaware &middot; 2023</span>
+          </div>
+          <p class="q-text">How do you scale a Deployment manually using `kubectl`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q38</span>
+            <span class="q-tag">Asked at Zoho &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you debug a Pod stuck in `Pending` state?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q39</span>
+            <span class="q-tag">Asked at Byju&#x27;s &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you debug a Pod stuck in `CrashLoopBackOff`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q40</span>
+            <span class="q-tag">Asked at PhonePe &middot; 2024</span>
+          </div>
+          <p class="q-text">How do you view logs of a previous (crashed) container instance of a Pod?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q41</span>
+            <span class="q-tag">Asked at Amazon &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a PodDisruptionBudget, and why is it important during node maintenance?</p>
+        </div>
+</div>
+<h2 id="sec-services-and-networking" class="section-title">Services &amp; Networking</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q42</span>
+            <span class="q-tag">Asked at Microsoft &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a Kubernetes Service, and why do Pods need one instead of using Pod IPs directly?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q43</span>
+            <span class="q-tag">Asked at Google &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the difference between ClusterIP, NodePort, and LoadBalancer Service types?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q44</span>
+            <span class="q-tag">Asked at Accenture &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a headless Service, and when would you use one?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q45</span>
+            <span class="q-tag">Asked at TCS &middot; 2025</span>
+          </div>
+          <p class="q-text">How does a Service find and route traffic to the correct Pods?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q46</span>
+            <span class="q-tag">Asked at Infosys &middot; 2026</span>
+          </div>
+          <p class="q-text">What is kube-proxy, and what modes can it operate in (iptables vs IPVS)?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q47</span>
+            <span class="q-tag">Asked at Wipro &middot; 2026</span>
+          </div>
+          <p class="q-text">What is an Ingress resource, and how is it different from a Service of type LoadBalancer?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q48</span>
+            <span class="q-tag">Asked at Cognizant &middot; 2026</span>
+          </div>
+          <p class="q-text">What is an Ingress Controller, and name a few you&#x27;ve worked with (Nginx, Traefik, ALB).</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q49</span>
+            <span class="q-tag">Asked at Deloitte &middot; 2023</span>
+          </div>
+          <p class="q-text">How does DNS resolution work inside a Kubernetes cluster (CoreDNS)?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q50</span>
+            <span class="q-tag">Asked at JPMorgan Chase &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a NetworkPolicy, and how would you use one to restrict traffic between namespaces?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q51</span>
+            <span class="q-tag">Asked at Walmart Labs &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the Container Network Interface (CNI), and name a few CNI plugins you&#x27;ve used.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q52</span>
+            <span class="q-tag">Asked at Flipkart &middot; 2024</span>
+          </div>
+          <p class="q-text">What is the difference between `externalName`, `externalIPs`, and `LoadBalancer` in a Service spec?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q53</span>
+            <span class="q-tag">Asked at Paytm &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you troubleshoot a Service that isn&#x27;t routing traffic to any Pods?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q54</span>
+            <span class="q-tag">Asked at Swiggy &middot; 2024</span>
+          </div>
+          <p class="q-text">What is `kubectl port-forward`, and when would you use it during debugging?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q55</span>
+            <span class="q-tag">Asked at Zomato &middot; 2025</span>
+          </div>
+          <p class="q-text">How would you expose a service to the internet in a cloud-managed Kubernetes cluster (EKS/AKS/GKE)?</p>
+        </div>
+</div>
+<h2 id="sec-configmaps-secrets-and-storage" class="section-title">ConfigMaps, Secrets &amp; Storage</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q56</span>
+            <span class="q-tag">Asked at HCLTech &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a ConfigMap, and how would you inject its values into a Pod?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q57</span>
+            <span class="q-tag">Asked at Capgemini &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a Kubernetes Secret, and how is it different from a ConfigMap?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q58</span>
+            <span class="q-tag">Asked at IBM &middot; 2026</span>
+          </div>
+          <p class="q-text">How are Secrets stored by default in etcd, and how would you enable encryption at rest?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q59</span>
+            <span class="q-tag">Asked at Oracle &middot; 2026</span>
+          </div>
+          <p class="q-text">What happens to Pods using a ConfigMap when the ConfigMap is updated — do they auto-refresh?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q60</span>
+            <span class="q-tag">Asked at Genpact &middot; 2026</span>
+          </div>
+          <p class="q-text">What is a PersistentVolume (PV) and a PersistentVolumeClaim (PVC), and how do they relate?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q61</span>
+            <span class="q-tag">Asked at Tech Mahindra &middot; 2023</span>
+          </div>
+          <p class="q-text">What is a StorageClass, and how does dynamic provisioning work?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q62</span>
+            <span class="q-tag">Asked at LTIMindtree &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the difference between `ReadWriteOnce`, `ReadOnlyMany`, and `ReadWriteMany` access modes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q63</span>
+            <span class="q-tag">Asked at Cisco &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you troubleshoot a Pod stuck in `Pending` due to an unbound PVC?</p>
+        </div>
+</div>
+<h2 id="sec-scheduling-scaling-and-resource-management" class="section-title">Scheduling, Scaling &amp; Resource Management</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q64</span>
+            <span class="q-tag">Asked at VMware &middot; 2024</span>
+          </div>
+          <p class="q-text">What is the difference between `nodeSelector`, node affinity, and taints/tolerations?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q65</span>
+            <span class="q-tag">Asked at Dell &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you ensure a specific Pod never runs on a particular node?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q66</span>
+            <span class="q-tag">Asked at Adobe &middot; 2024</span>
+          </div>
+          <p class="q-text">What is pod affinity vs. pod anti-affinity, and give a use case for each.</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q67</span>
+            <span class="q-tag">Asked at PayPal &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the Horizontal Pod Autoscaler (HPA), and how does it decide when to scale?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q68</span>
+            <span class="q-tag">Asked at Freshworks &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the Cluster Autoscaler, and how does it interact with HPA?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q69</span>
+            <span class="q-tag">Asked at Razorpay &middot; 2025</span>
+          </div>
+          <p class="q-text">What are resource `requests` used for during scheduling versus `limits` during runtime?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q70</span>
+            <span class="q-tag">Asked at Myntra &middot; 2026</span>
+          </div>
+          <p class="q-text">What is a taint, and how do tolerations allow a Pod to be scheduled on a tainted node?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q71</span>
+            <span class="q-tag">Asked at Nagarro &middot; 2026</span>
+          </div>
+          <p class="q-text">What is Quality of Service (QoS) class in Kubernetes — Guaranteed, Burstable, BestEffort?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q72</span>
+            <span class="q-tag">Asked at Publicis Sapient &middot; 2026</span>
+          </div>
+          <p class="q-text">How would you cordon and drain a node before performing maintenance on it?</p>
+        </div>
+</div>
+<h2 id="sec-kubectl-yaml-and-cluster-operations" class="section-title">kubectl, YAML &amp; Cluster Operations</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q73</span>
+            <span class="q-tag">Asked at EPAM Systems &middot; 2023</span>
+          </div>
+          <p class="q-text">How do you view all resources of every type running in a specific namespace?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q74</span>
+            <span class="q-tag">Asked at ThoughtWorks &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you edit a running resource directly using `kubectl edit`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q75</span>
+            <span class="q-tag">Asked at Persistent Systems &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the difference between `kubectl apply` and `kubectl create`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q76</span>
+            <span class="q-tag">Asked at Mphasis &middot; 2024</span>
+          </div>
+          <p class="q-text">How do you check why a Deployment rollout is stuck using `kubectl rollout status`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q77</span>
+            <span class="q-tag">Asked at Hexaware &middot; 2024</span>
+          </div>
+          <p class="q-text">What is `kubectl exec`, and how would you get an interactive shell inside a container?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q78</span>
+            <span class="q-tag">Asked at Zoho &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you copy a file from a Pod to your local machine using `kubectl cp`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q79</span>
+            <span class="q-tag">Asked at Byju&#x27;s &middot; 2025</span>
+          </div>
+          <p class="q-text">What does `kubectl get events` show, and how do you use it for troubleshooting?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q80</span>
+            <span class="q-tag">Asked at PhonePe &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a Kubernetes manifest, and what are the four mandatory top-level fields in one?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q81</span>
+            <span class="q-tag">Asked at Amazon &middot; 2025</span>
+          </div>
+          <p class="q-text">What is the difference between `apiVersion: apps/v1` and `apiVersion: v1` in a manifest?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q82</span>
+            <span class="q-tag">Asked at Microsoft &middot; 2026</span>
+          </div>
+          <p class="q-text">How do you dry-run a `kubectl apply` command without actually applying changes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q83</span>
+            <span class="q-tag">Asked at Google &middot; 2026</span>
+          </div>
+          <p class="q-text">What is a Helm chart, and how does it simplify deploying complex applications?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q84</span>
+            <span class="q-tag">Asked at Accenture &middot; 2026</span>
+          </div>
+          <p class="q-text">What is the difference between `helm install` and `helm upgrade --install`?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q85</span>
+            <span class="q-tag">Asked at TCS &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you roll back a Helm release to a previous version?</p>
+        </div>
+</div>
+<h2 id="sec-security-and-rbac" class="section-title">Security &amp; RBAC</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q86</span>
+            <span class="q-tag">Asked at Infosys &middot; 2023</span>
+          </div>
+          <p class="q-text">What is RBAC in Kubernetes, and what are the four main objects involved (Role, ClusterRole, RoleBinding, ClusterRoleBinding)?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q87</span>
+            <span class="q-tag">Asked at Wipro &middot; 2023</span>
+          </div>
+          <p class="q-text">What is the difference between a Role and a ClusterRole?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q88</span>
+            <span class="q-tag">Asked at Cognizant &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you grant a service account read-only access to Pods in a single namespace?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q89</span>
+            <span class="q-tag">Asked at Deloitte &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a ServiceAccount, and how is it different from a regular user account in Kubernetes?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q90</span>
+            <span class="q-tag">Asked at JPMorgan Chase &middot; 2024</span>
+          </div>
+          <p class="q-text">What is a SecurityContext, and how would you use it to run a container as a non-root user?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q91</span>
+            <span class="q-tag">Asked at Walmart Labs &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a Pod Security Standard (or Pod Security Policy in older clusters), and what does it enforce?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q92</span>
+            <span class="q-tag">Asked at Flipkart &middot; 2025</span>
+          </div>
+          <p class="q-text">What is a NetworkPolicy default-deny setup, and why is it a security best practice?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q93</span>
+            <span class="q-tag">Asked at Paytm &middot; 2025</span>
+          </div>
+          <p class="q-text">How do you rotate a compromised Secret in a running cluster with minimal downtime?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q94</span>
+            <span class="q-tag">Asked at Swiggy &middot; 2026</span>
+          </div>
+          <p class="q-text">What is image pull secret, and how do you authenticate to a private container registry from a Pod?</p>
+        </div>
+</div>
+<h2 id="sec-real-world-troubleshooting-and-cluster-scenarios" class="section-title">Real-World Troubleshooting &amp; Cluster Scenarios</h2>
+<div class="q-grid">
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q95</span>
+            <span class="q-tag">Asked at Zomato &middot; 2026</span>
+          </div>
+          <p class="q-text">A Pod shows `Running` status but the application inside isn&#x27;t responding to traffic — how do you debug it?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q96</span>
+            <span class="q-tag">Asked at HCLTech &middot; 2026</span>
+          </div>
+          <p class="q-text">Your Deployment rollout is stuck at &#x27;partially available&#x27; with some old and new Pods — what&#x27;s your troubleshooting approach?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q97</span>
+            <span class="q-tag">Asked at Capgemini &middot; 2023</span>
+          </div>
+          <p class="q-text">A Service has endpoints but requests still time out intermittently — what would you check?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q98</span>
+            <span class="q-tag">Asked at IBM &middot; 2023</span>
+          </div>
+          <p class="q-text">How would you investigate why a node suddenly went to `NotReady` state?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q99</span>
+            <span class="q-tag">Asked at Oracle &middot; 2023</span>
+          </div>
+          <p class="q-text">Your cluster&#x27;s etcd is running out of disk space — what steps would you take to recover it safely?</p>
+        </div>
+
+        <div class="q-card">
+          <div class="q-head">
+            <span class="q-num">Q100</span>
+            <span class="q-tag">Asked at Genpact &middot; 2024</span>
+          </div>
+          <p class="q-text">How would you perform a zero-downtime deployment of a critical production service in Kubernetes?</p>
+        </div>
+</div>
+
+  <footer>
+    Compiled for interview preparation &amp; mock-interview practice.
+  </footer>
+</div>
+
+</body>
+</html>
